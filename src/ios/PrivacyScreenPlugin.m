@@ -39,7 +39,10 @@ static UIImageView *imageView;
   } else {
     imageView = [[UIImageView alloc]initWithFrame:[self.viewController.view bounds]];
     [imageView setImage:splash];
-    
+    // [imageView setContentMode:UIViewContentModeCenter]; // custom
+    //[imageView setContentMode:UIViewContentModeScaleAspectFit]; // custom
+    [imageView setContentMode:UIViewContentModeScaleAspectFill]; // custom
+
     #ifdef __CORDOVA_4_0_0
         [[UIApplication sharedApplication].keyWindow addSubview:imageView];
     #else
@@ -53,13 +56,13 @@ static UIImageView *imageView;
 - (CDV_iOSDevice) getCurrentDevice
 {
   CDV_iOSDevice device;
-  
+
   UIScreen* mainScreen = [UIScreen mainScreen];
   CGFloat mainScreenHeight = mainScreen.bounds.size.height;
   CGFloat mainScreenWidth = mainScreen.bounds.size.width;
-  
+
   int limit = MAX(mainScreenHeight,mainScreenWidth);
-  
+
   device.iPad = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
   device.iPhone = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone);
   device.retina = ([mainScreen scale] == 2.0);
@@ -70,23 +73,37 @@ static UIImageView *imageView;
   // this is appropriate for detecting the runtime screen environment
   device.iPhone6 = (device.iPhone && limit == 667.0);
   device.iPhone6Plus = (device.iPhone && limit == 736.0);
-  
+
   return device;
+}
+
+- (BOOL) isUsingCDVLaunchScreen {
+    NSString* launchStoryboardName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UILaunchStoryboardName"];
+    if (launchStoryboardName) {
+        return ([launchStoryboardName isEqualToString:@"CDVLaunchScreen"]);
+    } else {
+        return NO;
+    }
 }
 
 - (NSString*)getImageName:(UIInterfaceOrientation)currentOrientation delegate:(id<CDVScreenOrientationDelegate>)orientationDelegate device:(CDV_iOSDevice)device
 {
   // Use UILaunchImageFile if specified in plist.  Otherwise, use Default.
   NSString* imageName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UILaunchImageFile"];
-  
   NSUInteger supportedOrientations = [orientationDelegate supportedInterfaceOrientations];
-  
+
+  // detect if we are using CB-9762 Launch Storyboard; if so, return the associated image instead
+  if ([self isUsingCDVLaunchScreen]) {
+      imageName = @"LaunchStoryboard";
+      return imageName;
+  }
+
   // Checks to see if the developer has locked the orientation to use only one of Portrait or Landscape
   BOOL supportsLandscape = (supportedOrientations & UIInterfaceOrientationMaskLandscape);
   BOOL supportsPortrait = (supportedOrientations & UIInterfaceOrientationMaskPortrait || supportedOrientations & UIInterfaceOrientationMaskPortraitUpsideDown);
   // this means there are no mixed orientations in there
   BOOL isOrientationLocked = !(supportsPortrait && supportsLandscape);
-  
+
   if (imageName) {
     imageName = [imageName stringByDeletingPathExtension];
   } else {
@@ -107,10 +124,10 @@ static UIImageView *imageView;
       }
     }
   }
-  
+
   BOOL isLandscape = supportsLandscape &&
   (currentOrientation == UIInterfaceOrientationLandscapeLeft || currentOrientation == UIInterfaceOrientationLandscapeRight);
-  
+
   if (device.iPhone5) { // does not support landscape
     imageName = isLandscape ? nil : [imageName stringByAppendingString:@"-568h"];
   } else if (device.iPhone6) { // does not support landscape
@@ -129,7 +146,7 @@ static UIImageView *imageView;
       }
     }
     imageName = [imageName stringByAppendingString:@"-736h"];
-    
+
   } else if (device.iPad) { // supports landscape
     if (isOrientationLocked) {
       imageName = [imageName stringByAppendingString:(supportsLandscape ? @"-Landscape" : @"-Portrait")];
@@ -139,7 +156,7 @@ static UIImageView *imageView;
         case UIInterfaceOrientationLandscapeRight:
           imageName = [imageName stringByAppendingString:@"-Landscape"];
           break;
-          
+
         case UIInterfaceOrientationPortrait:
         case UIInterfaceOrientationPortraitUpsideDown:
         default:
@@ -148,7 +165,7 @@ static UIImageView *imageView;
       }
     }
   }
-  
+
   return imageName;
 }
 
