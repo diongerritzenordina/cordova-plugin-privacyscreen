@@ -15,8 +15,11 @@ static UIImageView *imageView;
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppDidBecomeActive:)
                                                name:UIApplicationDidBecomeActiveNotification object:nil];
 
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppWillResignActive:)
-                                               name:UIApplicationWillResignActiveNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppDidBecomeActive:)
+                                               name:CDVPageDidLoadNotification object:nil];
+
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppDidEnterBackground:)
+                                               name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
 - (void)onAppDidBecomeActive:(UIApplication *)application
@@ -28,7 +31,7 @@ static UIImageView *imageView;
   }
 }
 
-- (void)onAppWillResignActive:(UIApplication *)application
+- (void)onAppDidEnterBackground:(UIApplication *)application
 {
   CDVViewController *vc = (CDVViewController*)self.viewController;
   NSString *imgName = [self getImageName:self.viewController.interfaceOrientation delegate:(id<CDVScreenOrientationDelegate>)vc device:[self getCurrentDevice]];
