@@ -27,7 +27,13 @@ static UIImageView *imageView;
   if (imageView == NULL) {
     self.viewController.view.window.hidden = NO;
   } else {
-    [imageView removeFromSuperview];
+    [UIView animateWithDuration:0.2f
+                     animations:^{
+                       imageView.alpha = 0.0f;
+                     }
+                     completion:^(BOOL finished) {
+                       [imageView removeFromSuperview];
+                     }];
   }
 }
 
