@@ -42,9 +42,7 @@ static UIImageView *imageView;
   } else {
     imageView = [[UIImageView alloc]initWithFrame:[self.viewController.view bounds]];
     [imageView setImage:splash];
-    // [imageView setContentMode:UIViewContentModeCenter]; // custom
-    //[imageView setContentMode:UIViewContentModeScaleAspectFit]; // custom
-    [imageView setContentMode:UIViewContentModeScaleAspectFill]; // custom
+    [imageView setContentMode:UIViewContentModeScaleAspectFill];
 
     #ifdef __CORDOVA_4_0_0
         [[UIApplication sharedApplication].keyWindow addSubview:imageView];
@@ -80,13 +78,14 @@ static UIImageView *imageView;
   return device;
 }
 
-- (BOOL) isUsingCDVLaunchScreen {
-    NSString* launchStoryboardName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UILaunchStoryboardName"];
-    if (launchStoryboardName) {
-        return ([launchStoryboardName isEqualToString:@"CDVLaunchScreen"]);
-    } else {
-        return NO;
-    }
+- (BOOL) isUsingCDVLaunchScreen
+{
+  NSString* launchStoryboardName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UILaunchStoryboardName"];
+  if (launchStoryboardName) {
+      return ([launchStoryboardName isEqualToString:@"CDVLaunchScreen"]);
+  } else {
+      return NO;
+  }
 }
 
 - (NSString*)getImageName:(UIInterfaceOrientation)currentOrientation delegate:(id<CDVScreenOrientationDelegate>)orientationDelegate device:(CDV_iOSDevice)device
